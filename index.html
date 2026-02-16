@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principles of Tech | Ch1</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-gradient-light: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass-bg-light: rgba(255, 255, 255, 0.90);
+            --glass-border-light: rgba(255, 255, 255, 0.6);
+            --text-main-light: #2d3748;
+            --primary-light: #7c3aed; /* Violet for Tech */
+            --accent-light: #06b6d4;  /* Cyan for Innovation */
+            --header-bg-light: rgba(255, 255, 255, 0.95);
+
+            --bg-gradient-dark: linear-gradient(135deg, #0f172a 0%, #312e81 100%);
+            --glass-bg-dark: rgba(30, 41, 59, 0.90);
+            --glass-border-dark: rgba(255, 255, 255, 0.1);
+            --text-main-dark: #f1f5f9;
+            --primary-dark: #a78bfa;
+            --accent-dark: #22d3ee;
+            --header-bg-dark: rgba(15, 23, 42, 0.95);
+
+            --bg-body: var(--bg-gradient-light);
+            --glass: var(--glass-bg-light);
+            --border: var(--glass-border-light);
+            --text: var(--text-main-light);
+            --primary: var(--primary-light);
+            --accent: var(--accent-light);
+            --header-bg: var(--header-bg-light);
+            --shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+        }
+
+        [data-theme="dark"] {
+            --bg-body: var(--bg-gradient-dark);
+            --glass: var(--glass-bg-dark);
+            --border: var(--glass-border-dark);
+            --text: var(--text-main-dark);
+            --primary: var(--primary-dark);
+            --accent: var(--accent-dark);
+            --header-bg: var(--header-bg-dark);
+            --shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.3s ease; }
+        
+        body {
+            font-family: 'Cairo', sans-serif; background: var(--bg-body); color: var(--text);
+            height: 100vh; overflow: hidden; display: flex; flex-direction: column;
+        }
+
+        /* --- Header --- */
+        header {
+            height: 80px; background: var(--header-bg); backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--primary); display: flex; align-items: center;
+            justify-content: space-between; padding: 0 25px; z-index: 1000; box-shadow: var(--shadow);
+            flex-shrink: 0;
+        }
+
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .header-title-container { text-align: center; position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; }
+        .header-title { font-weight: 900; font-size: 1.1rem; color: var(--primary); }
+        .header-subtitle { font-size: 0.75rem; color: var(--accent); font-weight: bold; }
+        .controls { display: flex; gap: 20px; align-items: center; }
+
+        /* --- Language Button Animation --- */
+        .lang-button {
+            height: 50px; width: 150px; border: none; border-radius: 10px; cursor: pointer;
+            position: relative; overflow: hidden; transition: all 0.5s ease-in-out;
+            background: transparent; font-family: 'Cairo', sans-serif;
+        }
+        .lang-button:hover { box-shadow: .5px .5px 150px var(--primary); }
+        .type1::after {
+            content: attr(data-hover); height: 50px; width: 150px; background-color: var(--primary);
+            color: #fff; position: absolute; top: 0%; left: 0%; transform: translateY(50px);
+            font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s ease-in-out;
+        }
+        .type1::before {
+            content: attr(data-main); height: 50px; width: 150px; background-color: var(--glass);
+            color: var(--primary); position: absolute; top: 0%; left: 0%; transform: translateY(0px) scale(1.2);
+            font-size: 1.1rem; font-weight: 600; display: flex; align-items: center; justify-content: center;
+            transition: all 0.5s ease-in-out; border: 1px solid var(--border); border-radius: 10px;
+        }
+        .type1:hover::after { transform: translateY(0) scale(1.2); }
+        .type1:hover::before { transform: translateY(-50px) scale(0) rotate(120deg); }
+
+        /* --- Info Button & Modal --- */
+        .info-btn {
+            background: rgba(6, 182, 212, 0.1); color: var(--accent); border: 1px solid var(--accent);
+            padding: 5px 12px; font-size: 1.2rem; border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center; cursor: pointer;
+        }
+        .info-btn:hover { background: var(--accent); color: white; transform: rotate(15deg); }
+
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 2000; display: none;
+            align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: var(--header-bg); padding: 40px; border-radius: 20px;
+            text-align: center; max-width: 500px; width: 90%;
+            border: 2px solid var(--primary); box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .btn-icon { background: var(--primary); color: white; padding: 10px 25px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; margin-top: 15px; font-family: 'Cairo'; }
+        .btn-icon:hover { background: var(--accent); }
+
+
+        /* --- Layout --- */
+        .container { display: flex; flex: 1; overflow: hidden; position: relative; }
+        
+        aside {
+            width: 340px; background: var(--glass); border-inline-end: 1px solid var(--border);
+            display: flex; flex-direction: column; backdrop-filter: blur(15px); z-index: 900;
+            transition: all 0.4s;
+        }
+
+        /* --- Complex Search Bar --- */
+        .search-area { padding: 25px; border-bottom: 1px solid var(--border); display: flex; justify-content: center; position: relative; height: 100px; flex-shrink: 0; }
+        .grid { height: 100%; width: 100%; background-image: linear-gradient(to right, #0f0f10 1px, transparent 1px), linear-gradient(to bottom, #0f0f10 1px, transparent 1px); background-size: 1rem 1rem; position: absolute; z-index: -1; filter: blur(1px); opacity: 0.2; }
+        #poda { display: flex; align-items: center; justify-content: center; position: relative; zoom: 0.9; }
+        .search-input-styled { background-color: #010201; border: none; width: 280px; height: 56px; border-radius: 10px; color: white; padding-inline: 59px; font-size: 14px; font-family: 'Cairo'; }
+        .search-input-styled:focus { outline: none; }
+        .white, .border, .darkBorderBg, .glow { max-height: 70px; max-width: 314px; height: 100%; width: 100%; position: absolute; overflow: hidden; z-index: -1; border-radius: 12px; filter: blur(3px); }
+        .white { max-height: 63px; max-width: 307px; border-radius: 10px; filter: blur(2px); }
+        .white::before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(83deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; filter: brightness(1.4); background-image: conic-gradient(rgba(0,0,0,0) 0%, #a099d8, rgba(0,0,0,0) 8%, rgba(0,0,0,0) 50%, #dfa2da, rgba(0,0,0,0) 58%); transition: all 2s; }
+        .border { max-height: 59px; max-width: 303px; border-radius: 11px; filter: blur(0.5px); }
+        .border::before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(70deg); position: absolute; width: 600px; height: 600px; filter: brightness(1.3); background-repeat: no-repeat; background-position: 0 0; background-image: conic-gradient(#1c191c, #402fb5 5%, #1c191c 14%, #1c191c 50%, #cf30aa 60%, #1c191c 64%); transition: all 2s; }
+        .darkBorderBg { max-height: 65px; max-width: 312px; }
+        .darkBorderBg::before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(82deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; background-image: conic-gradient(rgba(0,0,0,0), #18116a, rgba(0,0,0,0) 10%, rgba(0,0,0,0) 50%, #6e1b60, rgba(0,0,0,0) 60%); transition: all 2s; }
+        #poda:hover > .darkBorderBg::before { transform: translate(-50%, -50%) rotate(262deg); }
+        #poda:hover > .glow::before { transform: translate(-50%, -50%) rotate(240deg); }
+        #poda:hover > .white::before { transform: translate(-50%, -50%) rotate(263deg); }
+        #poda:hover > .border::before { transform: translate(-50%, -50%) rotate(250deg); }
+        #poda:focus-within > .darkBorderBg::before { transform: translate(-50%, -50%) rotate(442deg); transition: all 4s; }
+        #poda:focus-within > .glow::before { transform: translate(-50%, -50%) rotate(420deg); transition: all 4s; }
+        #poda:focus-within > .white::before { transform: translate(-50%, -50%) rotate(443deg); transition: all 4s; }
+        #poda:focus-within > .border::before { transform: translate(-50%, -50%) rotate(430deg); transition: all 4s; }
+        .glow { overflow: hidden; filter: blur(30px); opacity: 0.4; max-height: 130px; max-width: 354px; }
+        .glow:before { content: ""; z-index: -2; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(60deg); position: absolute; width: 999px; height: 999px; background-repeat: no-repeat; background-position: 0 0; background-image: conic-gradient(#000, #402fb5 5%, #000 38%, #000 50%, #cf30aa 60%, #000 87%); transition: all 2s; }
+        #filter-icon { position: absolute; top: 8px; right: 8px; display: flex; align-items: center; justify-content: center; z-index: 2; max-height: 40px; max-width: 38px; height: 100%; width: 100%; isolation: isolate; overflow: hidden; border-radius: 10px; background: linear-gradient(180deg, #161329, black, #1d1b4b); border: 1px solid transparent; }
+        .filterBorder { height: 42px; width: 40px; position: absolute; overflow: hidden; top: 7px; right: 7px; border-radius: 10px; }
+        .filterBorder::before { content: ""; text-align: center; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(90deg); position: absolute; width: 600px; height: 600px; background-repeat: no-repeat; background-position: 0 0; filter: brightness(1.35); background-image: conic-gradient(rgba(0,0,0,0), #3d3a4f, rgba(0,0,0,0) 50%, rgba(0,0,0,0) 50%, #3d3a4f, rgba(0,0,0,0) 100%); animation: rotate 4s linear infinite; }
+        #main-search { position: relative; }
+        #search-icon { position: absolute; left: 20px; top: 15px; }
+        @keyframes rotate { 100% { transform: translate(-50%, -50%) rotate(450deg); } }
+
+        /* --- List & Content --- */
+        .slide-list { 
+            list-style: none; overflow-y: auto; flex: 1; padding: 10px; 
+            -webkit-overflow-scrolling: touch; 
+        }
+        .list-item { 
+            padding: 12px 15px; margin-bottom: 6px; border-radius: 10px; cursor: pointer; font-size: 0.9rem; 
+            display: flex; justify-content: space-between; align-items: center; 
+        }
+        .list-item:hover { background: rgba(0,0,0,0.05); color: var(--primary); }
+        .list-item.active { background: linear-gradient(90deg, var(--primary), var(--accent)); color: white; font-weight: bold; }
+        
+        .slide-check {
+            width: 18px; height: 18px; margin-inline-end: 10px; cursor: pointer; accent-color: var(--accent);
+            z-index: 2;
+        }
+
+        main { 
+            flex: 1; padding: 30px; overflow-y: auto; display: flex; flex-direction: column; align-items: center; 
+            scroll-behavior: smooth; 
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .card { background: var(--glass); width: 100%; max-width: 850px; padding: 40px; border-radius: 24px; border: 1px solid var(--border); box-shadow: var(--shadow); margin-bottom: 40px; animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .badge { display: inline-block; padding: 6px 16px; border-radius: 50px; background: rgba(6, 182, 212, 0.1); color: var(--accent); font-weight: bold; font-size: 0.85rem; margin-bottom: 20px; }
+        h1 { font-size: 1.8rem; margin-bottom: 25px; line-height: 1.5; color: var(--primary); }
+        .content { font-size: 1.2rem; line-height: 1.9; margin-bottom: 30px; color: var(--text); }
+        
+        /* Tech Box */
+        .tech-box { background: rgba(124, 58, 237, 0.05); color: var(--text); padding: 20px; border-radius: 12px; border: 1px dashed var(--primary); margin: 20px 0; }
+        .tech-icon { font-size: 1.5rem; margin-inline-end: 10px; vertical-align: middle; }
+        
+        /* Comparison Table */
+        .comp-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .comp-table th, .comp-table td { border: 1px solid var(--border); padding: 10px; text-align: center; }
+        .comp-table th { background: rgba(0,0,0,0.05); color: var(--primary); }
+
+        /* --- General Info Box --- */
+        .info-box-general {
+            background: rgba(6, 182, 212, 0.08); border-right: 4px solid var(--accent);
+            padding: 15px; border-radius: 8px; margin-bottom: 25px; font-size: 1rem;
+            color: var(--text); display: flex; gap: 10px; align-items: start;
+        }
+        .info-box-icon { font-size: 1.5rem; }
+
+        /* --- Explanation Accordion --- */
+        .section-box { margin-top: 20px; border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+        .section-header { background: rgba(255,255,255,0.03); padding: 18px 25px; cursor: pointer; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .section-content { display: none; padding: 25px; border-top: 1px solid var(--border); }
+        .section-box.open .section-content { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* --- Nav Buttons --- */
+        .nav-actions { display: flex; gap: 60px; margin-top: 30px; justify-content: center; flex-wrap: wrap; }
+        .styled-btn { position: relative; width: 11em; height: 4em; outline: none; transition: 0.1s; background-color: transparent; border: none; font-size: 13px; font-weight: bold; color: var(--text); cursor: pointer; font-family: 'Cairo', sans-serif; }
+        .clip-box { --color: var(--primary); position: absolute; top: 0; left: 0; overflow: hidden; width: 100%; height: 100%; border: 5px double var(--color); box-shadow: inset 0px 0px 15px rgba(39, 97, 195, 0.3); -webkit-clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%); clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%); }
+        .arrow { position: absolute; transition: 0.2s; background-color: var(--primary); top: 35%; width: 11%; height: 30%; }
+        .leftArrow { left: -13.5%; -webkit-clip-path: polygon(100% 0, 100% 100%, 0 50%); clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+        .rightArrow { -webkit-clip-path: polygon(100% 49%, 0 0, 0 100%); clip-path: polygon(100% 49%, 0 0, 0 100%); left: 102%; }
+        .styled-btn:hover .rightArrow { background-color: var(--accent); left: -15%; animation: 0.6s ease-in-out both infinite alternate rightArrow8; }
+        .styled-btn:hover .leftArrow { background-color: var(--accent); left: 103%; animation: 0.6s ease-in-out both infinite alternate leftArrow8; }
+        .corner { position: absolute; width: 4em; height: 4em; background-color: var(--primary); box-shadow: inset 1px 1px 8px var(--primary); transform: scale(1) rotate(45deg); transition: 0.2s; }
+        .rightTop { top: -1.98em; left: 91%; } .leftTop { top: -1.96em; left: -3.0em; }
+        .leftBottom { top: 2.10em; left: -2.15em; } .rightBottom { top: 45%; left: 88%; }
+        .styled-btn:hover .corner { transform: scale(1.25) rotate(45deg); background-color: var(--accent); box-shadow: inset 1px 1px 8px var(--accent); }
+        .styled-btn:hover .clip-box { animation: 0.2s ease-in-out 0.55s both greenLight8; --color: var(--accent); }
+        @keyframes greenLight8 { from { } to { box-shadow: inset 0px 0px 32px var(--accent); } }
+        @keyframes leftArrow8 { from { transform: translate(0px); } to { transform: translateX(10px); } }
+        @keyframes rightArrow8 { from { transform: translate(0px); } to { transform: translateX(-10px); } }
+        .styled-btn:disabled { opacity: 0.5; pointer-events: none; filter: grayscale(1); }
+
+        /* --- BB8 Toggle --- */
+        .bb8-toggle { --toggle-size: 6px; --toggle-width: 10.625em; --toggle-height: 5.625em; --toggle-offset: calc((var(--toggle-height) - var(--bb8-diameter)) / 2); --toggle-bg: linear-gradient(#2c4770, #070e2b 35%, #628cac 50% 70%, #a6c5d4) no-repeat; --bb8-diameter: 4.375em; --radius: 99em; --transition: 0.4s; --accent: #de7d2f; --bb8-bg: #fff; cursor: pointer; font-size: var(--toggle-size); display: inline-block; }
+        .bb8-toggle *, .bb8-toggle *::before, .bb8-toggle *::after { box-sizing: border-box; }
+        .bb8-toggle__checkbox { appearance: none; display: none; }
+        .bb8-toggle__container { width: var(--toggle-width); height: var(--toggle-height); background: var(--toggle-bg); background-size: 100% 11.25em; background-position-y: -5.625em; border-radius: var(--radius); position: relative; transition: var(--transition); }
+        .bb8 { display: flex; flex-direction: column; align-items: center; position: absolute; top: calc(var(--toggle-offset) - 1.688em + 0.188em); left: var(--toggle-offset); transition: var(--transition); z-index: 2; }
+        .bb8__head-container { position: relative; transition: var(--transition); z-index: 2; transform-origin: 1.25em 3.75em; }
+        .bb8__head { overflow: hidden; margin-bottom: -0.188em; width: 2.5em; height: 1.688em; background: linear-gradient(transparent 0.063em, dimgray 0.063em 0.313em, transparent 0.313em 0.375em, var(--accent) 0.375em 0.5em, transparent 0.5em 1.313em, silver 1.313em 1.438em, transparent 1.438em), linear-gradient(45deg, transparent 0.188em, var(--bb8-bg) 0.188em 1.25em, transparent 1.25em), linear-gradient(-45deg, transparent 0.188em, var(--bb8-bg) 0.188em 1.25em, transparent 1.25em), linear-gradient(var(--bb8-bg) 1.25em, transparent 1.25em); border-radius: var(--radius) var(--radius) 0 0; position: relative; z-index: 1; filter: drop-shadow(0 0.063em 0.125em gray); }
+        .bb8__head::before { content: ""; position: absolute; width: 0.563em; height: 0.563em; background: radial-gradient(0.125em circle at 0.25em 0.375em, red, transparent), radial-gradient(0.063em circle at 0.375em 0.188em, var(--bb8-bg) 50%, transparent 100%), linear-gradient(45deg, #000 0.188em, dimgray 0.313em 0.375em, #000 0.5em); border-radius: var(--radius); top: 0.413em; left: 50%; transform: translate(-50%); box-shadow: 0 0 0 0.089em lightgray, 0.563em 0.281em 0 -0.148em, 0.563em 0.281em 0 -0.1em var(--bb8-bg), 0.563em 0.281em 0 -0.063em; z-index: 1; transition: var(--transition); }
+        .bb8__head::after { content: ""; position: absolute; bottom: 0.375em; left: 0; width: 100%; height: 0.188em; background: linear-gradient(to right, var(--accent) 0.125em, transparent 0.125em 0.188em, var(--accent) 0.188em 0.313em, transparent 0.313em 0.375em, var(--accent) 0.375em 0.938em, transparent 0.938em 1em, var(--accent) 1em 1.125em, transparent 1.125em 1.875em, var(--accent) 1.875em 2em, transparent 2em 2.063em, var(--accent) 2.063em 2.25em, transparent 2.25em 2.313em, var(--accent) 2.313em 2.375em, transparent 2.375em 2.438em, var(--accent) 2.438em); transition: var(--transition); }
+        .bb8__antenna { position: absolute; transform: translateY(-90%); width: 0.059em; border-radius: var(--radius) var(--radius) 0 0; transition: var(--transition); }
+        .bb8__antenna:nth-child(1) { height: 0.938em; right: 0.938em; background: linear-gradient(#000 0.188em, silver 0.188em); }
+        .bb8__antenna:nth-child(2) { height: 0.375em; left: 50%; transform: translate(-50%, -90%); background: silver; }
+        .bb8__body { width: 4.375em; height: 4.375em; background: var(--bb8-bg); border-radius: var(--radius); position: relative; overflow: hidden; transition: var(--transition); z-index: 1; transform: rotate(45deg); background: linear-gradient(-90deg, var(--bb8-bg) 4%, var(--accent) 4% 10%, transparent 10% 90%, var(--accent) 90% 96%, var(--bb8-bg) 96%), linear-gradient(var(--bb8-bg) 4%, var(--accent) 4% 10%, transparent 10% 90%, var(--accent) 90% 96%, var(--bb8-bg) 96%), linear-gradient(to right, transparent 2.156em, silver 2.156em 2.219em, transparent 2.188em), linear-gradient(transparent 2.156em, silver 2.156em 2.219em, transparent 2.188em); background-color: var(--bb8-bg); }
+        .bb8__body::after { content: ""; bottom: 1.5em; left: 0.563em; position: absolute; width: 0.188em; height: 0.188em; background: rgb(236, 236, 236); color: rgb(236, 236, 236); border-radius: 50%; box-shadow: 0.875em 0.938em, 0 -1.25em, 0.875em -2.125em, 2.125em -2.125em, 3.063em -1.25em, 3.063em 0, 2.125em 0.938em; }
+        .bb8__body::before { content: ""; width: 2.625em; height: 2.625em; position: absolute; border-radius: 50%; z-index: 0.1; overflow: hidden; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 0.313em solid var(--accent); background: radial-gradient(1em circle at center, rgb(236, 236, 236) 50%, transparent 51%), radial-gradient(1.25em circle at center, var(--bb8-bg) 50%, transparent 51%), linear-gradient(-90deg, transparent 42%, var(--accent) 42% 58%, transparent 58%), linear-gradient(var(--bb8-bg) 42%, var(--accent) 42% 58%, var(--bb8-bg) 58%); }
+        .artificial__hidden { position: absolute; border-radius: inherit; inset: 0; pointer-events: none; overflow: hidden; }
+        .bb8__shadow { content: ""; width: var(--bb8-diameter); height: 20%; border-radius: 50%; background: #3a271c; box-shadow: 0.313em 0 3.125em #3a271c; opacity: 0.25; position: absolute; bottom: 0; left: calc(var(--toggle-offset) - 0.938em); transition: var(--transition); transform: skew(-70deg); z-index: 1; }
+        .bb8-toggle__scenery { width: 100%; height: 100%; pointer-events: none; overflow: hidden; position: relative; border-radius: inherit; }
+        .bb8-toggle__scenery::before { content: ""; position: absolute; width: 100%; height: 30%; bottom: 0; background: #b18d71; z-index: 1; }
+        .bb8-toggle__cloud { z-index: 1; position: absolute; border-radius: 50%; }
+        .bb8-toggle__cloud:nth-last-child(1) { width: 0.875em; height: 0.625em; filter: blur(0.125em) drop-shadow(0.313em 0.313em #ffffffae) drop-shadow(-0.625em 0 #fff) drop-shadow(-0.938em -0.125em #fff); right: 1.875em; top: 2.813em; background: linear-gradient(to top right, #ffffffae, #ffffffae); transition: var(--transition); }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8-toggle__star:nth-child(1) { top: 0.625em; }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8 { left: calc(100% - var(--bb8-diameter) - var(--toggle-offset)); }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8__shadow { left: calc(100% - var(--bb8-diameter) - var(--toggle-offset) + 0.938em); transform: skew(70deg); }
+        .bb8-toggle__checkbox:checked + .bb8-toggle__container .bb8__body { transform: rotate(225deg); }
+        .bb8-toggle__checkbox:active + .bb8-toggle__container .bb8__head-container { transform: rotate(25deg); }
+        .bb8-toggle__checkbox:checked:active + .bb8-toggle__container .bb8__head-container { transform: rotate(-25deg); }
+
+        /* --- Responsive --- */
+        .menu-btn { display: none; background: none; border: none; font-size: 1.5rem; color: var(--text); cursor: pointer; z-index: 10; }
+        @media (max-width: 768px) {
+            header { padding: 0 15px; } .header-subtitle { display: none; }
+            .header-title-container { position: static; transform: none; text-align: right; flex: 1; margin: 0 10px; }
+            .controls { gap: 10px; } .lang-button { width: 100px; height: 40px; }
+            .type1::after, .type1::before { width: 100px; height: 40px; font-size: 0.9rem; }
+            .bb8-toggle { --toggle-size: 4px; display: inline-block !important; }
+            aside { position: fixed; right: -320px; height: calc(100vh - 80px); top: 80px; width: 280px; box-shadow: -5px 0 15px rgba(0,0,0,0.2); }
+            aside.open { right: 0; } .menu-btn { display: block; }
+            #poda { zoom: 0.7; }
+            main { padding: 15px; } .card { padding: 25px; margin-bottom: 20px; }
+            h1 { font-size: 1.4rem; } .content { font-size: 1rem; line-height: 1.7; }
+            .nav-actions { gap: 20px; } .styled-btn { font-size: 11px; }
+        }
+    </style>
+</head>
+<body data-theme="light">
+
+    <div id="infoModal" class="modal-overlay" onclick="toggleInfo()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div style="font-size: 3rem; margin-bottom: 15px;">⚙️</div>
+            <h2 style="color: var(--primary); margin-bottom: 15px;">عن المادة</h2>
+            <p style="color: var(--text); line-height: 1.6; margin-bottom: 25px;">
+                ملخص شامل للفصل الأول من "مبادئ التكنولوجيا".
+                <br>يغطي تعريف التكنولوجيا، تطورها التاريخي، الفرق بين العلم والهندسة، وتأثيرها في حياتنا.
+                <br>اضغط على "الشرح المبسط" للحصول على ملخص سريع.
+            </p>
+            <button class="btn-icon" onclick="toggleInfo()">إغلاق</button>
+        </div>
+    </div>
+
+    <header>
+        <div class="header-right">
+            <button class="menu-btn" onclick="toggleSidebar()">☰</button>
+            <button class="info-btn" onclick="toggleInfo()" title="معلومات">ℹ</button>
+        </div>
+        
+        <div class="header-title-container">
+            <div class="header-title" id="pageTitle">Principles of Tech</div>
+            <div class="header-subtitle">Module 1: Intro</div>
+        </div>
+
+        <div class="controls">
+            <label class="bb8-toggle" title="الوضع الليلي">
+                <input class="bb8-toggle__checkbox" type="checkbox" onchange="toggleTheme()" id="themeCheckbox">
+                <div class="bb8-toggle__container">
+                  <div class="bb8-toggle__scenery">
+                    <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
+                    <div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div><div class="bb8-toggle__star"></div>
+                    <div class="bb8-toggle__cloud"></div><div class="bb8-toggle__cloud"></div><div class="bb8-toggle__cloud"></div>
+                  </div>
+                  <div class="bb8">
+                    <div class="bb8__head-container"><div class="bb8__antenna"></div><div class="bb8__antenna"></div><div class="bb8__head"></div></div>
+                    <div class="bb8__body"></div>
+                  </div>
+                  <div class="artificial__hidden"><div class="bb8__shadow"></div></div>
+                </div>
+            </label>
+
+            <button class="lang-button type1" onclick="toggleLang()" id="langBtn" data-main="🇺🇸 English" data-hover="Switch ⇆"></button>
+        </div>
+    </header>
+
+    <div class="container">
+        <aside id="sidebar">
+            <div class="search-area">
+                <div class="grid"></div>
+                <div id="poda">
+                    <div class="glow"></div><div class="darkBorderBg"></div><div class="darkBorderBg"></div><div class="darkBorderBg"></div>
+                    <div class="white"></div><div class="border"></div>
+                    <div id="main-search">
+                        <input placeholder="Search..." type="text" id="searchInp" class="search-input-styled" onkeyup="filterSlides()" />
+                        <div class="filterBorder"></div>
+                        <div id="filter-icon">🔍</div>
+                        <div id="search-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 24 24" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" height="24" fill="none"><circle stroke="#b6a9b7" r="8" cy="11" cx="11"></circle><line stroke="#b6a9b7" y2="16.65" y1="22" x2="16.65" x1="22"></line></svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <ul class="slide-list" id="list"></ul>
+        </aside>
+
+        <main>
+            <div class="card" id="contentCard">
+                <span class="badge" id="slideBadge">Intro</span>
+                <h1 id="slideHeader">...</h1>
+                
+                <div id="normalSlideContent">
+                    <div class="info-box-general">
+                        <span class="info-box-icon">💡</span>
+                        <div id="generalInfoText">...</div>
+                    </div>
+
+                    <div class="content" id="slideHtml">...</div>
+                    
+                    <div class="section-box" onclick="toggleSection(this)">
+                        <div class="section-header">
+                            <span id="labelExpl">📋 الشرح المبسط</span>
+                            <span>▼</span>
+                        </div>
+                        <div class="section-content" id="explText">...</div>
+                    </div>
+                </div>
+
+                <div class="nav-actions">
+                    <button class="styled-btn" id="prevBtn" onclick="move(-1)">
+                        <span id="txtPrev">السابق</span>
+                        <div class="clip-box"><div class="leftTop corner"></div><div class="rightBottom corner"></div><div class="rightTop corner"></div><div class="leftBottom corner"></div></div>
+                        <span class="rightArrow arrow"></span><span class="leftArrow arrow"></span>
+                    </button>
+
+                    <button class="styled-btn" id="nextBtn" onclick="move(1)">
+                        <span id="txtNext">التالي</span>
+                        <div class="clip-box"><div class="leftTop corner"></div><div class="rightBottom corner"></div><div class="rightTop corner"></div><div class="leftBottom corner"></div></div>
+                        <span class="rightArrow arrow"></span><span class="leftArrow arrow"></span>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+<script>
+    // --- محتوى "مبادئ التكنولوجيا" ---
+    const slides = [
+        {
+            title: "1. تعريف التكنولوجيا",
+            title_en: "1. Definition of Technology",
+            expl: "التكنولوجيا مش بس أجهزة، هي المعرفة والمهارات اللي بنستخدمها عشان نحل مشاكل ونحسن حياتنا.",
+            expl_en: "Technology isn't just gadgets; it's the knowledge and skills used to solve problems and improve life.",
+            content: `
+                <p><strong>ما هي التكنولوجيا؟</strong></p>
+                <p>هي التطبيقات العلمية والعملية لتطوير أدوات وأنظمة تحسن الكفاءة.</p>
+                <div class="tech-box">
+                    <strong>تعريفات هامة:</strong><br>
+                    <span class="tech-icon">🗣️</span> <em>Jacques Ellul:</em> "مجموعة وسائل لتحقيق هدف بفعالية."<br>
+                    <span class="tech-icon">🌍</span> <em>Manuel Castells:</em> "محرك أساسي للتغيير الاجتماعي والاقتصادي."
+                </div>
+            `,
+            content_en: `
+                <p><strong>What is Technology?</strong></p>
+                <p>It refers to scientific applications used to develop tools and systems that enhance efficiency.</p>
+                <div class="tech-box">
+                    <strong>Key Definitions:</strong><br>
+                    <span class="tech-icon">🗣️</span> <em>Jacques Ellul:</em> "Means to achieve an objective effectively."<br>
+                    <span class="tech-icon">🌍</span> <em>Manuel Castells:</em> "Key driver of social & economic change."
+                </div>
+            `,
+            general_info: "كلمة تكنولوجيا أصلها يوناني (Techne) وتعني فن أو مهارة، و (Logos) وتعني علم.",
+            general_info_en: "The word Technology comes from Greek 'Techne' (art/skill) and 'Logos' (science)."
+        },
+        {
+            title: "2. التطور: العصور القديمة",
+            title_en: "2. Evolution: Ancient Times",
+            expl: "بدأت من الإنسان البدائي (أدوات حجرية)، مروراً بالفراعنة (أهرامات وزراعة) لحد الصين (ورق وبارود).",
+            expl_en: "Started with primitive humans (stone tools), through Pharaohs (Pyramids), to China (paper & gunpowder).",
+            content: `
+                <ul>
+                    <li><strong>البداية:</strong> أدوات حجرية للصيد والدفاع.</li>
+                    <li><strong>مصر القديمة:</strong> أنظمة ري، عمارة (أهرامات)، وكتابة هيروغليفية.</li>
+                    <li><strong>سومر (العراق):</strong> الكتابة المسمارية واختراع العجلة.</li>
+                    <li><strong>الصين:</strong> صناعة الورق، الحرير، والبارود.</li>
+                </ul>
+            `,
+            content_en: `
+                <ul>
+                    <li><strong>Early Humans:</strong> Stone tools for hunting.</li>
+                    <li><strong>Ancient Egypt:</strong> Irrigation, Pyramids, Hieroglyphics.</li>
+                    <li><strong>Sumerians:</strong> Cuneiform writing, the Wheel.</li>
+                    <li><strong>China:</strong> Paper, Silk, Gunpowder.</li>
+                </ul>
+            `,
+            general_info: "الزراعة كانت أول ثورة تكنولوجية سمحت للإنسان بالاستقرار وبناء الحضارات.",
+            general_info_en: "Agriculture was the first tech revolution allowing humans to settle and build civilizations."
+        },
+        {
+            title: "3. التطور: العصور الوسطى والحديثة",
+            title_en: "3. Middle Ages to Modern",
+            expl: "العصور الوسطى: مطبعة جوتنبرج. الثورة الصناعية: البخار والكهرباء. العصر الرقمي: الإنترنت والذكاء الاصطناعي.",
+            expl_en: "Middle Ages: Printing Press. Industrial Rev: Steam & Electricity. Digital Age: Internet & AI.",
+            content: `
+                <div class="tech-box">
+                    <strong>محطات رئيسية:</strong><br>
+                    1. <strong>العصور الوسطى:</strong> اختراع المطبعة (Gutenberg) في القرن 15.<br>
+                    2. <strong>الثورة الصناعية (18th Century):</strong> المحرك البخاري، الكهرباء، والإنتاج الضخم.<br>
+                    3. <strong>العصر الرقمي (20th Century):</strong> الكمبيوتر، الإنترنت، والذكاء الاصطناعي.
+                </div>
+            `,
+            content_en: `
+                <div class="tech-box">
+                    <strong>Key Milestones:</strong><br>
+                    1. <strong>Middle Ages:</strong> Printing Press (Gutenberg) in 15th Century.<br>
+                    2. <strong>Industrial Rev (18th Century):</strong> Steam Engine, Electricity, Mass Production.<br>
+                    3. <strong>Digital Age (20th Century):</strong> Computers, Internet, AI.
+                </div>
+            `,
+            general_info: "اختراع المطبعة يعتبر أهم حدث في الألفية الثانية لأنه نشر المعرفة للعامة.",
+            general_info_en: "The Printing Press is considered the most important invention of the 2nd millennium."
+        },
+        {
+            title: "4. التكنولوجيا في الحياة اليومية",
+            title_en: "4. Tech in Daily Life",
+            expl: "التكنولوجيا غيرت طريقة تواصلنا (سوشيال ميديا)، تعليمنا (أونلاين)، وصحتنا (أجهزة ذكية).",
+            expl_en: "Tech changed how we communicate (Social Media), learn (Online), and heal (Smart Devices).",
+            content: `
+                <ul>
+                    <li><strong>الاتصالات:</strong> السوشيال ميديا، 5G، وتطبيقات المراسلة.</li>
+                    <li><strong>التعليم:</strong> التعليم عن بعد (E-Learning)، والواقع الافتراضي (VR).</li>
+                    <li><strong>الصحة:</strong> التطبيب عن بعد (Telemedicine) والساعات الذكية لمراقبة الصحة.</li>
+                    <li><strong>الترفيه:</strong> منصات البث (Netflix) والألعاب المتطورة.</li>
+                </ul>
+            `,
+            content_en: `
+                <ul>
+                    <li><strong>Communication:</strong> Social Media, 5G, Messaging Apps.</li>
+                    <li><strong>Education:</strong> E-Learning, Virtual Reality (VR).</li>
+                    <li><strong>Healthcare:</strong> Telemedicine, Smart wearables.</li>
+                    <li><strong>Entertainment:</strong> Streaming (Netflix), Advanced Gaming.</li>
+                </ul>
+            `,
+            general_info: "تقنية 5G ستغير العالم بسرعتها الهائلة، مما يدعم السيارات ذاتية القيادة.",
+            general_info_en: "5G technology will reshape the world with speeds supporting autonomous vehicles."
+        },
+        {
+            title: "5. التكنولوجيا في الصناعة",
+            title_en: "5. Tech in Industry",
+            expl: "المصانع بقت ذكية: روبوتات بتشتغل لوحدها، طباعة ثلاثية الأبعاد، وانترنت الأشياء.",
+            expl_en: "Factories got smart: Robots, 3D Printing, and IoT.",
+            content: `
+                <p><strong>ثورة في الإنتاج:</strong></p>
+                <ul>
+                    <li><strong>الأتمتة (Automation):</strong> استخدام الروبوتات لزيادة الدقة وتقليل الخطأ.</li>
+                    <li><strong>إنترنت الأشياء (IoT):</strong> مصانع ذكية تراقب نفسها وتتنبأ بالأعطال.</li>
+                    <li><strong>الطباعة ثلاثية الأبعاد (3D Printing):</strong> تصنيع نماذج معقدة بتكلفة أقل (طبي، فضاء).</li>
+                    <li><strong>الأمن السيبراني:</strong> حماية البيانات الصناعية الحساسة.</li>
+                </ul>
+            `,
+            content_en: `
+                <p><strong>Production Revolution:</strong></p>
+                <ul>
+                    <li><strong>Automation:</strong> Robots for precision and less error.</li>
+                    <li><strong>IoT:</strong> Smart factories monitoring themselves.</li>
+                    <li><strong>3D Printing:</strong> Complex designs at lower cost (Aerospace, Medical).</li>
+                    <li><strong>Cybersecurity:</strong> Protecting sensitive industrial data.</li>
+                </ul>
+            `,
+            general_info: "الطباعة ثلاثية الأبعاد يمكنها الآن بناء منازل كاملة وأعضاء بشرية.",
+            general_info_en: "3D printing can now build entire houses and bio-print human organs."
+        },
+        {
+            title: "6. علم vs تكنولوجيا vs هندسة",
+            title_en: "6. Science vs Tech vs Eng",
+            expl: "العلم بيقول (ليه؟)، التكنولوجيا بتقول (إزاي؟)، الهندسة بتاخدهم وتصمم حل (مشروع).",
+            expl_en: "Science asks (Why?), Tech asks (How?), Engineering designs the solution.",
+            content: `
+                <table class="comp-table">
+                    <tr><th>المجال</th><th>التعريف</th><th>السؤال</th></tr>
+                    <tr><td><strong>العلم (Science)</strong></td><td>دراسة الظواهر وقوانين الطبيعة.</td><td>لماذا؟ (Why)</td></tr>
+                    <tr><td><strong>التكنولوجيا (Tech)</strong></td><td>تطبيق عملي للمعرفة لإنتاج أدوات.</td><td>كيف؟ (How)</td></tr>
+                    <tr><td><strong>الهندسة (Engineering)</strong></td><td>تصميم وبناء أنظمة باستخدام الاثنين.</td><td>تصميم (Design)</td></tr>
+                </table>
+            `,
+            content_en: `
+                <table class="comp-table">
+                    <tr><th>Field</th><th>Definition</th><th>Question</th></tr>
+                    <tr><td><strong>Science</strong></td><td>Study of natural phenomena/laws.</td><td>Why?</td></tr>
+                    <tr><td><strong>Technology</strong></td><td>Practical application of knowledge.</td><td>How?</td></tr>
+                    <tr><td><strong>Engineering</strong></td><td>Designing systems using both.</td><td>Design</td></tr>
+                </table>
+            `,
+            general_info: "مثال: العلم يدرس الكهرباء، التكنولوجيا تصنع اللمبة، الهندسة تصمم شبكة الكهرباء للمدينة.",
+            general_info_en: "Ex: Science studies electricity, Tech makes the bulb, Eng designs the power grid."
+        },
+        {
+            title: "7. الطيف الهندسي (The Spectrum)",
+            title_en: "7. The Engineering Spectrum",
+            expl: "المهندس بيركز أكتر على النظريات والتصميم، التقني (Technologist) بيركز على التنفيذ والإنتاج.",
+            expl_en: "Engineers focus on theory/design, Technologists focus on application/production.",
+            content: `
+                <p><strong>توزيع الأدوار:</strong></p>
+                <div style="background: linear-gradient(90deg, #a78bfa 50%, #22d3ee 50%); height: 20px; border-radius: 10px; margin: 10px 0;"></div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                    <span>Engineering (Theory & Design)</span>
+                    <span>Technology (Production & Ops)</span>
+                </div>
+                <br>
+                <ul>
+                    <li><strong>المهندس:</strong> يبتكر ويصمم (مرحلة التصميم).</li>
+                    <li><strong>التقني:</strong> يطبق ويدير (مرحلة الإنتاج والتشغيل).</li>
+                </ul>
+            `,
+            content_en: `
+                <p><strong>Role Distribution:</strong></p>
+                <div style="background: linear-gradient(90deg, #a78bfa 50%, #22d3ee 50%); height: 20px; border-radius: 10px; margin: 10px 0;"></div>
+                <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                    <span>Engineering (Theory & Design)</span>
+                    <span>Technology (Production & Ops)</span>
+                </div>
+                <br>
+                <ul>
+                    <li><strong>Engineer:</strong> Innovates and Designs (Design Phase).</li>
+                    <li><strong>Technologist:</strong> Applies and Manages (Production Phase).</li>
+                </ul>
+            `,
+            general_info: "كلاهما مكمل للآخر، لا غنى عن المصمم ولا عن المنفذ.",
+            general_info_en: "They complement each other; neither designer nor executor can work alone."
+        },
+        {
+            title: "8. الخاتمة والمستقبل",
+            title_en: "8. Conclusion & Future",
+            expl: "التكنولوجيا سلاح ذو حدين، بتحسن حياتنا بس فيها تحديات زي الخصوصية والبطالة.",
+            expl_en: "Tech is a double-edged sword; improves life but brings challenges like privacy and job loss.",
+            content: `
+                <p><strong>الخلاصة:</strong></p>
+                <ul>
+                    <li>التكنولوجيا جزء لا يتجزأ من التطور البشري.</li>
+                    <li>المستقبل يحمل ابتكارات في الذكاء الاصطناعي والروبوتات.</li>
+                    <li><strong>التحديات:</strong> البطالة التكنولوجية، تهديدات الأمن السيبراني، وقضايا الأخلاق.</li>
+                </ul>
+                <p>يجب تبني التكنولوجيا بمسؤولية لضمان مستقبل مستدام.</p>
+            `,
+            content_en: `
+                <p><strong>Conclusion:</strong></p>
+                <ul>
+                    <li>Technology is integral to human progress.</li>
+                    <li>Future holds innovations in AI and Robotics.</li>
+                    <li><strong>Challenges:</strong> Tech unemployment, Cyber threats, Ethical issues.</li>
+                </ul>
+                <p>We must embrace technology responsibly for a sustainable future.</p>
+            `,
+            general_info: "هل تعلم؟ يُتوقع أن يغير الذكاء الاصطناعي 85 مليون وظيفة بحلول عام 2025.",
+            general_info_en: "Did you know? AI is expected to displace 85 million jobs by 2025."
+        }
+    ];
+
+    let idx = 0;
+    let uiLang = 'ar';
+    
+    const dom = {
+        title: document.getElementById('slideHeader'),
+        content: document.getElementById('slideHtml'),
+        normalContainer: document.getElementById('normalSlideContent'),
+        expl: document.getElementById('explText'),
+        badge: document.getElementById('slideBadge'),
+        list: document.getElementById('list'),
+        prev: document.getElementById('prevBtn'),
+        next: document.getElementById('nextBtn'),
+        lblExpl: document.getElementById('labelExpl'),
+        pageTitle: document.getElementById('pageTitle'),
+        sidebar: document.getElementById('sidebar'),
+        search: document.getElementById('searchInp'),
+        langBtn: document.getElementById('langBtn'),
+        txtPrev: document.getElementById('txtPrev'),
+        txtNext: document.getElementById('txtNext'),
+        generalInfo: document.getElementById('generalInfoText')
+    };
+
+    function init() {
+        renderList();
+        loadSlide(0);
+        document.ondragstart = null; 
+    }
+
+    function toggleSlideCheck(index, event) {
+        event.stopPropagation();
+        const checkbox = event.target;
+        const savedProgress = JSON.parse(localStorage.getItem('techProgress') || '{}');
+        savedProgress[index] = checkbox.checked;
+        localStorage.setItem('techProgress', JSON.stringify(savedProgress));
+    }
+
+    function renderList() {
+        dom.list.innerHTML = '';
+        const savedProgress = JSON.parse(localStorage.getItem('techProgress') || '{}');
+
+        slides.forEach((s, i) => {
+            let li = document.createElement('li');
+            li.className = 'list-item';
+            
+            let chk = document.createElement('input');
+            chk.type = 'checkbox';
+            chk.className = 'slide-check';
+            chk.checked = savedProgress[i] || false;
+            chk.onclick = (e) => toggleSlideCheck(i, e);
+
+            let num = i === slides.length - 1 ? '🚀' : i + 1;
+            let displayTitle = uiLang === 'ar' ? s.title : s.title_en;
+            let cleanTitle = displayTitle.includes('.') ? displayTitle.split('.')[1] : displayTitle;
+            
+            let textSpan = document.createElement('span');
+            textSpan.innerHTML = `${cleanTitle} <span style="font-size:0.8rem; opacity:0.7;">${num}</span>`;
+            textSpan.style.flex = "1";
+
+            li.appendChild(chk);
+            li.appendChild(textSpan);
+            
+            li.onclick = () => loadSlide(i);
+            dom.list.appendChild(li);
+        });
+        updateActiveItem(idx);
+    }
+
+    function loadSlide(index) {
+        idx = index;
+        const s = slides[index];
+        const isAr = uiLang === 'ar';
+
+        dom.title.innerHTML = isAr ? s.title : s.title_en;
+        dom.badge.innerText = isAr ? `درس ${index + 1}` : `Lesson ${index + 1}`;
+        dom.content.innerHTML = isAr ? s.content : s.content_en;
+        dom.expl.innerHTML = isAr ? s.expl : s.expl_en;
+        
+        dom.generalInfo.innerText = isAr ? (s.general_info || "...") : (s.general_info_en || "...");
+
+        dom.prev.disabled = index === 0;
+        dom.next.disabled = index === slides.length - 1;
+
+        updateActiveItem(index);
+        document.querySelectorAll('.section-box').forEach(b => b.classList.remove('open'));
+        if(window.innerWidth <= 768) dom.sidebar.classList.remove('open');
+    }
+
+    function updateActiveItem(index) {
+        const items = document.querySelectorAll('.list-item');
+        items.forEach((item, i) => {
+            if(i === index) item.classList.add('active');
+            else item.classList.remove('active');
+        });
+    }
+
+    function move(step) {
+        const newIdx = idx + step;
+        if(newIdx >= 0 && newIdx < slides.length) loadSlide(newIdx);
+    }
+
+    function toggleSection(el) { el.classList.toggle('open'); }
+    function toggleSidebar() { dom.sidebar.classList.toggle('open'); }
+    function toggleInfo() { 
+        const modal = document.getElementById('infoModal'); 
+        if(modal.style.display === 'flex') {
+            modal.style.display = 'none';
+        } else {
+            modal.style.display = 'flex';
+        }
+    }
+
+    function filterSlides() {
+        const q = dom.search.value.toLowerCase();
+        const items = document.querySelectorAll('.list-item');
+        slides.forEach((s, i) => {
+            const t = uiLang === 'ar' ? s.title : s.title_en;
+            if(t.toLowerCase().includes(q)) items[i].style.display = 'flex';
+            else items[i].style.display = 'none';
+        });
+    }
+
+    function toggleLang() {
+        uiLang = uiLang === 'ar' ? 'en' : 'ar';
+        const isAr = uiLang === 'ar';
+        
+        dom.langBtn.setAttribute('data-main', isAr ? "🇺🇸 English" : "🇪🇬 العربية");
+        dom.langBtn.setAttribute('data-hover', isAr ? "Switch ⇆" : "تغيير ⇆");
+
+        dom.pageTitle.innerText = "Principles of Tech";
+        dom.txtPrev.innerText = isAr ? "السابق" : "Prev";
+        dom.txtNext.innerText = isAr ? "التالي" : "Next";
+        dom.lblExpl.innerText = isAr ? "📋 الشرح المبسط" : "📋 Simple Expl";
+        dom.search.placeholder = isAr ? "بحث..." : "Search...";
+        
+        document.documentElement.dir = isAr ? 'rtl' : 'ltr';
+        document.documentElement.lang = isAr ? 'ar' : 'en';
+        
+        renderList();
+        loadSlide(idx);
+    }
+
+    function toggleTheme() {
+        const body = document.body;
+        const isLight = body.getAttribute('data-theme') === 'light';
+        body.setAttribute('data-theme', isLight ? 'dark' : 'light');
+        const chk = document.getElementById('themeCheckbox');
+        if(chk) chk.checked = !isLight;
+    }
+
+    init();
+</script>
+
+</body>
+</html>
